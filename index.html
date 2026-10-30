@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Gunung Padang - Simulation Archéologique 3D | Dr Karima Tekaya (IBI 2026)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Times New Roman', serif;
+            background: linear-gradient(135deg, #0f0f0a 0%, #1a1814 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .simulation-container {
+            max-width: 1300px;
+            width: 100%;
+            background: #0a0a07;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            border: 1px solid rgba(180, 140, 100, 0.2);
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #1a1610 0%, #2a2218 100%);
+            padding: 20px 30px;
+            border-bottom: 1px solid #b89a6e;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            color: #e8d4b0;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .header h1 small {
+            font-size: 0.8rem;
+            color: #b89a6e;
+            font-weight: normal;
+        }
+        
+        .header .subtitle {
+            color: #aa9977;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        
+        .viewer {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            background: #1a2418;
+        }
+        
+        .footer {
+            background: #0f0d0a;
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-top: 1px solid #3a3028;
+            font-size: 0.8rem;
+        }
+        
+        .credit {
+            color: #b89a6e;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+        
+        .credit strong {
+            color: #d4b88c;
+            font-weight: 600;
+        }
+        
+        .info-note {
+            color: #7a6a58;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .info-note span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        @media (max-width: 700px) {
+            body { padding: 10px; }
+            .header h1 { font-size: 1.3rem; }
+            .header { padding: 12px 20px; }
+            .footer { flex-direction: column; text-align: center; padding: 12px 20px; }
+            .viewer { height: 500px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="simulation-container">
+        <div class="header">
+            <h1>🏛️ GUNUNG PADANG <small>West Java, Indonesia</small></h1>
+            <div class="subtitle">Megalithic Terraced Site | 5 terraces | 370 andesite steps | 885m elevation</div>
+        </div>
+        
+        <div id="gunung-padang-sim" class="viewer"></div>
+        
+        <div class="footer">
+            <div class="credit">
+                🎨 <strong>Dr Karima Tekaya</strong> — Institut des Beaux-Arts IBI 2026
+            </div>
+            <div class="info-note">
+                <span>🔮 <em>Underground chambers & tunnels are hypothetical reconstructions</em></span>
+                <span>🖱️ Mouse: rotate • right-click: pan • scroll: zoom</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+    (function() {
+        var container = document.getElementById('gunung-padang-sim');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        var scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a2418);
+        scene.fog = new THREE.FogExp2(0x1a2418, 0.02);
+        
+        var camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(5, 3.8, 6.2);
+        camera.lookAt(0, 1.2, 0);
+        
+        var renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+        
+        var controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.rotateSpeed = 1.0;
+        controls.zoomSpeed = 1.2;
+        controls.panSpeed = 0.8;
+        controls.target.set(0, 1.2, 0);
+        
+        // Lumières
+        var ambient = new THREE.AmbientLight(0x5c5848, 0.7);
+        scene.add(ambient);
+        var sun = new THREE.DirectionalLight(0xffe8cc, 1.2);
+        sun.position.set(5, 8, 3);
+        sun.castShadow = true;
+        sun.shadow.mapSize.width = 1024;
+        sun.shadow.mapSize.height = 1024;
+        scene.add(sun);
+        var fill = new THREE.PointLight(0xaa8a66, 0.5);
+        fill.position.set(-2, 3, 2);
+        scene.add(fill);
+        var backLight = new THREE.PointLight(0xccaa77, 0.3);
+        backLight.position.set(1, 2, -3);
+        scene.add(backLight);
+        
+        // Grille
+        var grid = new THREE.GridHelper(14, 20, 0x8a7a5a, 0x5a4a3a);
+        grid.position.y = -0.5;
+        grid.material.transparent = true;
+        grid.material.opacity = 0.2;
+        scene.add(grid);
+        
+        // Terrain volcanique
+        var terrainGeo = new THREE.PlaneGeometry(14, 14, 80, 80);
+        var pos = terrainGeo.attributes.position.array;
+        for (var i = 0; i < pos.length; i += 3) {
+            var x = pos[i], z = pos[i+2];
+            pos[i+1] = Math.sin(x * 0.6) * 0.08 * Math.cos(z * 0.6) + Math.sin(x * 1.5) * 0.04 + Math.cos(z * 1.5) * 0.04 - 0.35;
+        }
+        terrainGeo.computeVertexNormals();
+        var terrainMat = new THREE.MeshStandardMaterial({ color: 0x5a4a3a, roughness: 0.85 });
+        var terrain = new THREE.Mesh(terrainGeo, terrainMat);
+        terrain.rotation.x = -Math.PI / 2;
+        terrain.receiveShadow = true;
+        scene.add(terrain);
+        
+        // Terrasses semi-transparentes
+        var widths = [4.6, 3.9, 3.2, 2.6, 2.0];
+        var depths = [3.9, 3.3, 2.7, 2.2, 1.7];
+        var heights = [0.55, 0.65, 0.7, 0.75, 0.8];
+        var ys = [-0.15, 0.3, 0.85, 1.45, 2.1];
+        var colors = [0x6e5e48, 0x6a5a46, 0x685846, 0x665644, 0x625240];
+        
+        for (var i = 0; i < 5; i++) {
+            var boxMat = new THREE.MeshStandardMaterial({ color: colors[i], roughness: 0.65, transparent: true, opacity: 0.55 });
+            var box = new THREE.Mesh(new THREE.BoxGeometry(widths[i], heights[i], depths[i]), boxMat);
+            box.position.set(0, ys[i] + heights[i]/2, 0);
+            box.castShadow = true;
+            box.receiveShadow = true;
+            scene.add(box);
+            
+            // Colonnes basaltiques
+            var colMat = new THREE.MeshStandardMaterial({ color: 0x5a4a38, roughness: 0.4 });
+            var colCount = 8 - i;
+            var yPos = ys[i] + heights[i] + 0.15;
+            for (var c = -colCount/2; c <= colCount/2; c++) {
+                var xPos = (c / (colCount/2)) * (widths[i]/2 - 0.15);
+                if (Math.abs(xPos) <= widths[i]/2) {
+                    var col = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.45, 0.14), colMat);
+                    col.position.set(xPos, yPos, depths[i]/2 - 0.08);
+                    col.castShadow = true;
+                    scene.add(col);
+                    var col2 = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.45, 0.14), colMat);
+                    col2.position.set(xPos, yPos, -depths[i]/2 + 0.08);
+                    col2.castShadow = true;
+                    scene.add(col2);
+                }
+            }
+            for (var c = -colCount/2; c <= colCount/2; c++) {
+                var zPos = (c / (colCount/2)) * (depths[i]/2 - 0.15);
+                if (Math.abs(zPos) <= depths[i]/2) {
+                    var col = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.45, 0.14), colMat);
+                    col.position.set(widths[i]/2 - 0.08, yPos, zPos);
+                    col.castShadow = true;
+                    scene.add(col);
+                    var col2 = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.45, 0.14), colMat);
+                    col2.position.set(-widths[i]/2 + 0.08, yPos, zPos);
+                    col2.castShadow = true;
+                    scene.add(col2);
+                }
+            }
+        }
+        
+        // Escalier central
+        for (var i = 0; i < 38; i++) {
+            var t = i / 38;
+            var step = new THREE.Mesh(new THREE.BoxGeometry(0.9 * (1 - t * 0.15), 0.07, 0.22), new THREE.MeshStandardMaterial({ color: 0x8a7a62, roughness: 0.55 }));
+            step.position.set(0.85 - i * 0.017, -0.08 + t * 2.3, 1.15);
+            step.castShadow = true;
+            scene.add(step);
+        }
+        
+        // Menhirs (pierres dressées)
+        var stoneMat = new THREE.MeshStandardMaterial({ color: 0x7a684e, roughness: 0.45 });
+        var stones = [[-0.6,2.55,0.55],[0.6,2.55,0.55],[-0.5,2.55,-0.65],[0.5,2.55,-0.65],[0,2.58,0.85],[-0.85,2.52,-0.1],[0.85,2.52,-0.1],[-0.3,2.55,-0.95],[0.3,2.55,0.95]];
+        for (var i = 0; i < stones.length; i++) {
+            var stone = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.55 + Math.random() * 0.3, 0.2), stoneMat);
+            stone.position.set(stones[i][0], stones[i][1], stones[i][2]);
+            stone.castShadow = true;
+            scene.add(stone);
+        }
+        
+        // Positions des chambres
+        var posA = { x: 1.0, y: 0.15, z: 0.8 };
+        var posB = { x: -0.9, y: 0.75, z: -0.7 };
+        var posC = { x: 0.5, y: 1.5, z: 0.5 };
+        
+        // Fonction pour créer une chambre
+        function createChamber(x, y, z, sizeX, sizeY, sizeZ, color, lightColor) {
+            var chamber = new THREE.Mesh(new THREE.BoxGeometry(sizeX, sizeY, sizeZ), 
+                new THREE.MeshStandardMaterial({ color: color, roughness: 0.2, metalness: 0.1, emissive: color, emissiveIntensity: 0.3 }));
+            chamber.position.set(x, y, z);
+            chamber.castShadow = true;
+            scene.add(chamber);
+            
+            var edges = new THREE.EdgesGeometry(chamber.geometry);
+            var wire = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: lightColor }));
+            wire.position.copy(chamber.position);
+            scene.add(wire);
+            
+            var pointLight = new THREE.PointLight(lightColor, 0.6, 4);
+            pointLight.position.set(x, y, z);
+            scene.add(pointLight);
+            
+            return { chamber: chamber, wire: wire, light: pointLight };
+        }
+        
+        var chamberA = createChamber(posA.x, posA.y, posA.z, 0.7, 0.6, 0.7, 0xff7733, 0xffaa66);
+        var chamberB = createChamber(posB.x, posB.y, posB.z, 0.8, 0.7, 0.8, 0xcc6633, 0xcc8866);
+        var chamberC = createChamber(posC.x, posC.y, posC.z, 0.9, 0.8, 0.9, 0xaa5533, 0xbb7755);
+        
+        // Matériau des tunnels
+        var tunnelMat = new THREE.MeshStandardMaterial({ color: 0x8a6a4a, roughness: 0.4, transparent: true, opacity: 0.7, emissive: 0x442200, emissiveIntensity: 0.15 });
+        
+        function createTunnel(p1, p2, radius, color) {
+            var start = new THREE.Vector3(p1.x, p1.y, p1.z);
+            var end = new THREE.Vector3(p2.x, p2.y, p2.z);
+            var direction = new THREE.Vector3().subVectors(end, start);
+            var length = direction.length();
+            
+            var cylinder = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, 12), tunnelMat);
+            cylinder.position.copy(start.clone().add(end).multiplyScalar(0.5));
+            cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), direction.clone().normalize());
+            cylinder.castShadow = true;
+            scene.add(cylinder);
+            
+            var midLight = new THREE.PointLight(color, 0.35, 2.5);
+            midLight.position.copy(start.clone().add(end).multiplyScalar(0.5));
+            scene.add(midLight);
+            
+            return cylinder;
+        }
+        
+        // 2 tunnels seulement (A↔B et B↔C)
+        var tunnelAB = createTunnel(posA, posB, 0.26, 0xff8866);
+        var tunnelBC = createTunnel(posB, posC, 0.28, 0xcc7755);
+        
+        // Portes
+        var doorMat = new THREE.MeshStandardMaterial({ color: 0x9a7a5a, roughness: 0.3 });
+        
+        var doorA = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.5, 0.05), doorMat);
+        doorA.position.set(1.0, 0.2, 1.15);
+        doorA.castShadow = true;
+        scene.add(doorA);
+        
+        var doorB = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.55, 0.05), doorMat);
+        doorB.position.set(-1.25, 0.85, -1.1);
+        doorB.castShadow = true;
+        scene.add(doorB);
+        
+        var doorC = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.05), doorMat);
+        doorC.position.set(0.5, 1.6, 1.1);
+        doorC.castShadow = true;
+        scene.add(doorC);
+        
+        // Coque cutaway
+        var shellMat = new THREE.MeshStandardMaterial({ color: 0x8a7a6a, opacity: 0.2, transparent: true, side: THREE.DoubleSide });
+        var shell = new THREE.Mesh(new THREE.ConeGeometry(3.8, 2.9, 32), shellMat);
+        shell.position.y = 1.0;
+        scene.add(shell);
+        
+        // Végétation
+        var bushMat = new THREE.MeshStandardMaterial({ color: 0x5c6e4a, roughness: 0.7 });
+        for (var i = 0; i < 80; i++) {
+            var angle = Math.random() * Math.PI * 2;
+            var radius = 4.5 + Math.random() * 2;
+            var bush = new THREE.Mesh(new THREE.ConeGeometry(0.1 + Math.random() * 0.08, 0.22, 4), bushMat);
+            bush.position.set(Math.cos(angle) * radius, -0.3 + Math.random() * 0.2, Math.sin(angle) * radius);
+            bush.castShadow = true;
+            scene.add(bush);
+        }
+        
+        // ========== INTERFACE ==========
+        
+        // Panneau info
+        var infoDiv = document.createElement('div');
+        infoDiv.style.cssText = 'position:absolute;top:15px;left:15px;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);color:#e8dcc8;padding:8px 15px;border-radius:12px;font-family:system-ui,sans-serif;font-size:12px;border-left:3px solid #b89a6e;z-index:20;pointer-events:none';
+        infoDiv.innerHTML = '<b style="color:#e8d4b0;">🔍 Simulation Archéologique</b><br>5 terrasses | 370 marches | 3 chambres hypothétiques<br><span style="font-size:10px;color:#d4a05a;">✨ Tunnels de connexion A↔B et B↔C</span>';
+        container.appendChild(infoDiv);
+        
+        // Panneau de contrôle
+        var panelDiv = document.createElement('div');
+        panelDiv.style.cssText = 'position:absolute;bottom:15px;left:15px;right:15px;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);padding:8px 15px;border-radius:50px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;z-index:20;font-family:system-ui,sans-serif';
+        panelDiv.innerHTML = `
+            <button id="btnShell" style="background:#3a2a1e;border:none;color:#fff;padding:6px 14px;border-radius:30px;cursor:pointer;font-size:12px">🏺 Cutaway</button>
+            <button id="btnChambers" style="background:#3a2a1e;border:none;color:#fff;padding:6px 14px;border-radius:30px;cursor:pointer;font-size:12px">🔮 Chambers</button>
+            <button id="btnLight" style="background:#3a2a1e;border:none;color:#fff;padding:6px 14px;border-radius:30px;cursor:pointer;font-size:12px">☀️ Light Mode</button>
+            <div style="display:flex;align-items:center;gap:6px;background:#2a1e14;padding:3px 12px;border-radius:30px;color:#e8dcc8;font-size:11px">
+                <span>🔆 Opacity</span>
+                <input type="range" id="opacitySlider" min="0" max="0.8" step="0.01" value="0.2" style="width:90px">
+            </div>
+        `;
+        container.appendChild(panelDiv);
+        
+        // États
+        var shellVisible = true;
+        var chambersVisible = true;
+        var isLight = false;
+        
+        document.getElementById('btnShell').onclick = function() {
+            shellVisible = !shellVisible;
+            shell.visible = shellVisible;
+            this.style.background = shellVisible ? '#3a2a1e' : '#8b6b42';
+        };
+        
+        document.getElementById('btnChambers').onclick = function() {
+            chambersVisible = !chambersVisible;
+            chamberA.chamber.visible = chambersVisible;
+            chamberA.wire.visible = chambersVisible;
+            chamberA.light.visible = chambersVisible;
+            chamberB.chamber.visible = chambersVisible;
+            chamberB.wire.visible = chambersVisible;
+            chamberB.light.visible = chambersVisible;
+            chamberC.chamber.visible = chambersVisible;
+            chamberC.wire.visible = chambersVisible;
+            chamberC.light.visible = chambersVisible;
+            tunnelAB.visible = chambersVisible;
+            tunnelBC.visible = chambersVisible;
+            doorA.visible = chambersVisible;
+            doorB.visible = chambersVisible;
+            doorC.visible = chambersVisible;
+            this.style.background = chambersVisible ? '#3a2a1e' : '#8b6b42';
+        };
+        
+        document.getElementById('btnLight').onclick = function() {
+            isLight = !isLight;
+            if (isLight) {
+                scene.background = new THREE.Color(0xd4c8b0);
+                scene.fog = new THREE.FogExp2(0xd4c8b0, 0.01);
+                terrain.material.color.setHex(0x8a7a62);
+                sun.intensity = 1.4;
+                ambient.intensity = 0.85;
+                infoDiv.style.background = 'rgba(240,235,220,0.9)';
+                infoDiv.style.color = '#3a2a1e';
+                panelDiv.style.background = 'rgba(240,235,220,0.9)';
+                this.style.background = '#8b6b42';
+                this.innerHTML = '🌙 Dark';
+            } else {
+                scene.background = new THREE.Color(0x1a2418);
+                scene.fog = new THREE.FogExp2(0x1a2418, 0.02);
+                terrain.material.color.setHex(0x5a4a3a);
+                sun.intensity = 1.0;
+                ambient.intensity = 0.6;
+                infoDiv.style.background = 'rgba(0,0,0,0.7)';
+                infoDiv.style.color = '#e8dcc8';
+                panelDiv.style.background = 'rgba(0,0,0,0.75)';
+                this.style.background = '#3a2a1e';
+                this.innerHTML = '☀️ Light Mode';
+            }
+        };
+        
+        document.getElementById('opacitySlider').oninput = function(e) {
+            var val = parseFloat(e.target.value);
+            shell.material.opacity = val;
+        };
+        
+        // Animation des lumières
+        var time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.005;
+            if (chambersVisible) {
+                var intensity = 0.5 + Math.sin(time * 8) * 0.15;
+                chamberA.light.intensity = intensity;
+                chamberB.light.intensity = intensity;
+                chamberC.light.intensity = intensity;
+            }
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+        window.addEventListener('resize', function() {
+            var w = container.clientWidth, h = container.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+        
+        console.log('Gunung Padang Simulation — Dr Karima Tekaya (IBI 2026)');
+    })();
+    </script>
+</body>
+</html>
